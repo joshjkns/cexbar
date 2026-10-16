@@ -1,0 +1,52 @@
+name: Release
+
+# Push a tag like v1.2.0 to build and publish a release, or run it by hand from the Actions tab.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 1.2.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Work out version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            V="${{ inputs.version }}"
+          else
+            V="${GITHUB_REF_NAME}"
+          fi
+          V="${V#v}"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "tag=v$V" >> "$GITHUB_OUTPUT"
+
+      - name: Build universal app
+        run: UNIVERSAL=1 VERSION="${{ steps.version.outputs.version }}" ./build.sh
+
+      - name: Package
+        run: |
+          ditto -c -k --keepParent "CeX Bar.app" "CeX-Bar-${{ steps.version.outputs.version }}.zip"
+          lipo -archs "CeX Bar.app/Contents/MacOS/CeXBar"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          ZIP: CeX-Bar-${{ steps.version.outputs.version }}.zip
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ZIP" --clobber
+          else
+            gh release create "$TAG" "$ZIP" --title "CeX Bar $TAG" --generate-notes --target "$GITHUB_SHA"
+          fi
