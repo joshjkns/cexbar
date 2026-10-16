@@ -754,14 +754,10 @@ struct ContentView: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .fill(Color(red: 0.89, green: 0.12, blue: 0.15))
-                Text("CeX")
-                    .font(.system(size: 10, weight: .heavy))
-                    .foregroundStyle(.white)
-            }
-            .frame(width: 30, height: 30)
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 34, height: 34)
+                .padding(-2)
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(headline)

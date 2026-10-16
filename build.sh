@@ -26,6 +26,7 @@ for arch in $ARCHS; do
     CeXBar.swift -o "$BUILD/CeXBar-$arch"
 done
 lipo -create "$BUILD"/CeXBar-* -output "$APP/Contents/MacOS/CeXBar"
+cp AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -36,6 +37,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleName</key><string>CeX Bar</string>
   <key>CFBundleDisplayName</key><string>CeX Bar</string>
   <key>CFBundleExecutable</key><string>CeXBar</string>
+  <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>$VERSION</string>
   <key>CFBundleVersion</key><string>$VERSION</string>
